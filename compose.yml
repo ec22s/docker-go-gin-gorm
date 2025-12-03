@@ -1,0 +1,29 @@
+services:
+  go:
+    build: .
+    ports:
+      - "8008:80"
+    volumes:
+      - ./app:/app
+  mysql:
+    image: mysql:latest
+    platform: linux/amd64
+    environment:
+      - MYSQL_USER=dev
+      - MYSQL_ROOT_PASSWORD=dev
+      - MYSQL_PASSWORD=dev
+      - MYSQL_DATABASE=first
+      # - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - db-vol:/var/lib/mysql
+    # ports:
+    #   - "3306:3306"
+    secrets:
+      - mysql_secret
+
+secrets:
+  mysql_secret:
+    file: mysql_secret.txt
+
+volumes:
+  db-vol:
