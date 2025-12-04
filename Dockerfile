@@ -1,5 +1,7 @@
 FROM golang:latest
+
 WORKDIR /app
+
 RUN go mod init go_gin_gorm && \
   go install github.com/air-verse/air@latest && \
   go get -u \
@@ -11,4 +13,8 @@ RUN go mod init go_gin_gorm && \
     github.com/golang-jwt/jwt && \
   go mod tidy && \
   air init
+
+COPY private_key.pem /tmp/
+COPY public_key.pem /tmp/
+
 CMD ["air"]

@@ -2,17 +2,17 @@
 
 https://qiita.com/fujifuji1414/items/b95d3f0d5f79d77360cb と
 
-https://qiita.com/sedori/items/840e39a0cbf9d5bff006 を利用・参照させてもらった、
-
-Dockerで完結する認証付きWeb APIの開発テンプレートです
+https://qiita.com/sedori/items/840e39a0cbf9d5bff006 を利用・参照させてもらった、Dockerで完結する認証付きWeb APIの開発テンプレートです
 
 - 構成物 : MySQL + Go + Gin + GORM + JWT + Air (ホットリロード用)
 
-- JWTのハッシュアルゴリズムは `HS256 (HMAC SHA256)`、有効期間と秘密鍵は `/app/.env` で設定 
-
-- 独自に足したもの : Makefileでの便利コマンド
-
 - 各ソフトウェア・ライブラリのバージョンは基本 `latest`
+
+- 独自に足したもの
+
+  - Makefileでの便利コマンド
+
+  - JWTのハッシュアルゴリズムを `RS512 (RSA-SHA256)` にし、秘密鍵でJWT生成、公開鍵でJWT検証
 
 連絡等は[プロフィール](https://github.com/ec22s)記載のe-mailへお願いします
 
@@ -28,11 +28,29 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 
 - Docker Compse version v2.40.3-desktop.1
 
+- OpenSSL 3.6.0 1 Oct 2025 (Library: OpenSSL 3.6.0 1 Oct 2025)
+
 <br>
 
 ## 最小限の使い方
 
 - カレントはリポジトリのルートでいいです
+
+- 利用者各位で `RSA-SHA512` の秘密鍵 `private_key.pem` と公開鍵 `public_key.pem` を準備し、カレントに置いて下さい
+
+  - OpenSSLによる作成コマンド例
+
+    ```
+    openssl genpkey -algorithm RSA -out private_key.pem
+    openssl rsa -pubout -in private_key.pem -out public_key.pem
+    ```
+
+  - ファイル名が異なる場合、Dockerfileでコンテナへコピーする行を編集して下さい
+
+    ```
+    COPY private_key.pem /tmp/
+    COPY public_key.pem /tmp/
+    ```
 
 - `make up` を実行します
 
@@ -149,6 +167,10 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 ## 設定
 
 - 同じ項目で複数ある記述箇所はまとめたいですが、とりあえず
+
+- JWTの有効期間
+
+  - `/app/.env` → `TOKEN_HOUR_LIFESPAN`
 
 - Gin
 

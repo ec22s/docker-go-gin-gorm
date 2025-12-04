@@ -17,12 +17,20 @@ func GenerateToken(id uint) (string, error) {
   if err != nil {
     return "", err
   }
-  claims := jwt.MapClaims{}
+  token := jwt.New(jwt.SigningMethodRS512)
+  claims := token.Claims.(jwt.MapClaims)
   claims["authorized"] = true
   claims["user_id"] = id
   claims["exp"] = time.Now().Add(time.Hour * time.Duration(tokenLifespan)).Unix()
-  token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-  return token.SignedString([]byte(os.Getenv("API_SECRET")))
+	privateKeyData, err := os.ReadFile("/tmp/private_key.pem")
+  if err != nil {
+    return "", err
+  }
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyData)
+  if err != nil {
+    return "", err
+  }
+  return token.SignedString(key)
 }
 
 func extractTokenString(c *gin.Context) string {
@@ -35,11 +43,16 @@ func extractTokenString(c *gin.Context) string {
 }
 
 func parseToken(tokenString string) (*jwt.Token, error) {
-  token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-    if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-      return nil, fmt.Errorf("There was an error")
+	publicKeyData, err := os.ReadFile("/tmp/public_key.pem")
+  if err != nil {
+    return nil, err
+  }
+  token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+    key, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyData)
+    if err != nil {
+      return "", err
     }
-    return []byte(os.Getenv("API_SECRET")), nil
+    return key, nil
   })
   if err != nil {
     return nil, err
