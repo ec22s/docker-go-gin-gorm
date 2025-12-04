@@ -158,7 +158,7 @@ https://qiita.com/sedori/items/840e39a0cbf9d5bff006 を利用・参照させて�
 
 - `make err-login-1` `make err-login-2` ログイン失敗テスト
 
-- `make err-api-1` `make err-api-2` APIコール時の認証失敗テスト
+- `make err-api-1` `make err-api-2` APIコール時のJWT検証失敗テスト
 
   - Makefileにある `dummy_token` を使い、`401 Unauthorized` が返ります
 
