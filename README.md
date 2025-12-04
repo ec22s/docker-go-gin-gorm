@@ -2,25 +2,21 @@
 
 https://qiita.com/fujifuji1414/items/b95d3f0d5f79d77360cb と
 
-https://qiita.com/sedori/items/840e39a0cbf9d5bff006 を元にした、
+https://qiita.com/sedori/items/840e39a0cbf9d5bff006 を利用・参照させてもらった、
 
 Dockerで完結する認証付きWeb APIの開発テンプレートです
 
-- 構成物 : MySQL + Go + Gin + GORM + JWT + Air (ホットリロード)
+- 構成物 : MySQL + Go + Gin + GORM + JWT + Air (ホットリロード用)
 
 - 独自に足したもの : Makefileでの便利コマンド
 
 - 各ソフトウェア・ライブラリのバージョンは基本 `latest`
 
-- TODO: 認証用ミドルウェア作成、トークン利用のテスト追加
-
-<br>
-
 連絡等は[プロフィール](https://github.com/ec22s)記載のe-mailへお願いします
 
 <br>
 
-## 動作確認環境
+## 動作確認環境 (2025年12月)
 
 - macOS 15.6 (24G84)
 
@@ -32,60 +28,125 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 
 <br>
 
-## 使い方
+## 最小限の使い方
 
-- 基本、リポジトリトップから各種Makeコマンド実行で完結します
+- カレントはリポジトリのルートでいいです
 
-- `make up` コンテナのビルドと起動
+- `make up` を実行します
+
+  - コンテナのビルドと起動が行われます
 
   - MySQLのテーブル作成はGinの初回起動時にGORMがします
 
-- `make test-root` Webサーバの稼動チェック
+- APIとDBの準備を少し待ちます
+
+  - `make test-root` が `404 page not found` を返し、`make tables` の結果に `users` が出れば準備完了です
+
+- ユーザ名とパスワードをMakefileの冒頭に記入します
+
+  ```
+  username=yourname
+  password=yoursecret
+  ```
+
+- `make test-register` を実行します (ユーザ登録)
+
+  - 正常なら以下のように成功レスポンスが返ります (パスワードは空白)
+
+    ```
+    HTTP/1.1 200 OK
+    ...
+    {"data": ... }
+    ```
+
+- `make test-login` を実行します (ログインとJWT取得)
+
+  - 正常なら以下のようにJWTが返ります
+
+    ```
+    HTTP/1.1 200 OK
+    ...
+    {"token": ... }
+    ```
+
+- JWTをMakefileの `token=` に記入します
+
+- `make test-api` を実行します (JWTでAPIコール)
+
+  - 正常ならユーザ登録時と同じレスポンスが返ります
+
+    ```
+    HTTP/1.1 200 OK
+    ...
+    {"data": ... }
+    ```
+
+<br>
+
+## 便利コマンド
+
+- `make clean-restart` 全て破棄してやり直し
+
+- `make logs-go` APIサーバのログ表示
+
+  - 正常な起動直後の様子が下記です
+
+  - 中ほど `building...` で少し時間がかかります
+
+    ```
+    go-1  |
+    go-1  |   __    _   ___
+    go-1  |  / /\  | | | |_)
+    go-1  | /_/--\ |_| |_| \_ v1.63.4, built with Go go1.25.5
+    go-1  |
+    go-1  | watching .
+    go-1  | watching controllers
+    go-1  | watching libraries
+    go-1  | watching middlewares
+    go-1  | watching models
+    go-1  | watching utils
+    go-1  | watching utils/token
+    go-1  | building...
+    go-1  | running...
+    go-1  | [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+    go-1  |
+    go-1  | [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+    go-1  |  - using env:	export GIN_MODE=release
+    go-1  |  - using code:	gin.SetMode(gin.ReleaseMode)
+    go-1  |
+    go-1  | [GIN-debug] POST   /api/register             --> go_gin_gorm/controllers.Register (3 handlers)
+    go-1  | [GIN-debug] POST   /api/login                --> go_gin_gorm/controllers.Login (3 handlers)
+    go-1  | [GIN-debug] GET    /api/admin/user           --> go_gin_gorm/controllers.CurrentUser (4 handlers)
+    go-1  | [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+    go-1  | Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
+    go-1  | [GIN-debug] Listening and serving HTTP on :80
+    ```
+
+- `make test-root` APIサーバの稼動チェック
 
   - `404 page not found` が返れば正常
-
-  - 注 : コンテナ起動直後だとWebサーバが準備中でエラーになります
-
-    - TODO: Webサーバ起動が完了したら自動実行させたい
 
 - `make tables` MySQLのユーザテーブルの存在確認
 
   - `users` が表示されれば正常
 
-  - 注 : コンテナ起動直後だとGORMのマイグレーション中でエラーになります
+- `make table-rows` MySQLのユーザテーブルのレコード確認
 
-    - TODO: マイグレーションが完了したら自動実行させたい
+- `make err-register-1` `make err-register-2`  ユーザ登録失敗のテスト
 
-- `make test-register` ユーザ登録用
+- `make err-login-1` `make err-login-2` ログイン失敗テスト
 
-  - ユーザ名とパスワードはMakefileの先頭あたりで定義しており、自由に変えられます
+- `make err-api-1` `make err-api-2` APIコール時の認証失敗テスト
 
-    ```
-    username=
-    password=
-    ```
-
-  - 成功するとMySQLの `users` テーブルにレコードが追加されます
-
-  - レコード確認は `make table-rows`
-
-  - `make err-register-1` `make err-register-2`  はエラーケースのテスト
-
-- `make test-login` ログイン & JWT確認用
-
-  - 成功するとJWTが返ります
-
-    ```
-    {"token":"***************************"}
-    ```
-
-  - `make err-login-1` `make err-login-2`  はエラーケースのテスト
+  - Makefileにある `dummy_token` を使い、`401 Unauthorized` が返ります
 
 - その他若干のコマンドがMakefileにあります
 
 <br>
 
 ## 設定
+
+- 同じ項目で複数ある記述箇所はまとめたいですが、とりあえず
 
 - JWT
 
@@ -112,19 +173,19 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 
     - `/compose.yml`
 
-    - `/Makefile` → 冒頭あたりの変数名 `fqdn_host`
+    - `/Makefile` → `HOST_PORT`
 
 - MySQL
 
   - ユーザ名とパスワードは下記3箇所に記載
+
+    - 初期値はともに `dev`
 
     - `/compose.yml` → `MYSQL_USER` `MYSQL_PASSWORD`
 
     - `/app/.env` → `DB_USER` `DB_PASS`
 
     - `/mysql_secret.txt` コマンドにパスワードを含めない用
-
-    - TODO: できれば一箇所にまとめたい
 
   - ホスト名 (=Docker Composeのサービス名) は下記3箇所に記載
 
@@ -134,7 +195,7 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 
     - `/app.env` → `DB_HOST`
 
-    - `/Makefile` → 冒頭あたりの変数名 `db_command`
+    - `/Makefile` → `DB_HOST`
 
   - ポート番号はデフォルト (変更する場合は下記2ファイルに要反映)
 
@@ -150,6 +211,16 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 
     - `/app.env` → `DB_NAME`
 
-    - `/Makefile` → 冒頭あたりの変数名 `db_command`
+    - `/Makefile` → `DB_NAME`
+
+<br>
+
+## TODO
+
+- コンテナ起動時、Airのbuildingが終わるまで待たせたい
+
+- 同じ設定項目の記述箇所をまとめたい
+
+<br>
 
 以上
