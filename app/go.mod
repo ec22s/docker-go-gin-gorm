@@ -3,8 +3,8 @@ module go_gin_gorm
 go 1.25.5
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.11.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.45.0
 	gorm.io/driver/mysql v1.6.0
