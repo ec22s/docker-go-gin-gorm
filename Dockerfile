@@ -8,7 +8,7 @@ RUN go mod init go_gin_gorm && \
     gorm.io/driver/mysql \
     golang.org/x/crypto \
     github.com/joho/godotenv \
-    github.com/dgrijalva/jwt-go && \
+    github.com/golang-jwt/jwt && \
   go mod tidy && \
   air init
 CMD ["air"]
