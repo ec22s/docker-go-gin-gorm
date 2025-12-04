@@ -8,6 +8,8 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 
 - 構成物 : MySQL + Go + Gin + GORM + JWT + Air (ホットリロード用)
 
+- JWTのハッシュアルゴリズムは `HS256 (HMAC SHA256)`、有効期間と秘密鍵は `/app/.env` で設定 
+
 - 独自に足したもの : Makefileでの便利コマンド
 
 - 各ソフトウェア・ライブラリのバージョンは基本 `latest`
@@ -61,7 +63,7 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 
 - `make test-login` を実行します (ログインとJWT取得)
 
-  - 正常なら以下のようにJWTが返ります
+  - 正常ならAPIサーバでJWTを生成し、以下のように返します
 
     ```
     HTTP/1.1 200 OK
@@ -69,11 +71,11 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
     {"token": ... }
     ```
 
-- JWTをMakefileの `token=` に記入します
+- JWTのトークンをMakefileの `token=` に記入します
 
 - `make test-api` を実行します (JWTでAPIコール)
 
-  - 正常ならユーザ登録時と同じレスポンスが返ります
+  - APIサーバでJWTを検証し、正常ならユーザ登録時と同じレスポンスが返ります
 
     ```
     HTTP/1.1 200 OK
@@ -147,15 +149,6 @@ Dockerで完結する認証付きWeb APIの開発テンプレートです
 ## 設定
 
 - 同じ項目で複数ある記述箇所はまとめたいですが、とりあえず
-
-- JWT
-
-  - `/app/.env` に2つ設定あり
-
-    - トークンの有効期限 `TOKEN_HOUR_LIFESPAN`
-
-    - 署名に使用する秘密鍵 `API_SECRET`
-
 
 - Gin
 
