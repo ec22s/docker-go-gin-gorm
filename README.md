@@ -14,6 +14,8 @@ https://qiita.com/sedori/items/840e39a0cbf9d5bff006 を利用・参照させて�
 
   - JWTのハッシュアルゴリズムを `RS512 (RSA-SHA256)` にし、秘密鍵でJWT生成、公開鍵でJWT検証
 
+  - 元記事どおり `HS256 (HMAC-SHA256)` と秘密鍵を利用する場合、ブランチ `jwt-hs256` が使えます
+
 連絡等は[プロフィール](https://github.com/ec22s)記載のe-mailへお願いします
 
 <br>
